@@ -1,0 +1,242 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+	
+
+	<bean id="networkFileLogger" class="org.apache.log4j.Logger"
+		factory-method="getLogger">
+		<constructor-arg value="networkFileLogger" />
+	</bean>
+
+	<bean id="eventFileLogger" class="org.apache.log4j.Logger"
+		factory-method="getLogger">
+		<constructor-arg value="eventFileLogger" />
+	</bean>
+
+	<bean id="eventConsoleLogger" class="org.apache.log4j.Logger"
+		factory-method="getLogger">
+		<constructor-arg value="eventConsoleLogger" />
+	</bean>
+
+	<bean id="eventAtleastOnceFileLogger" class="org.apache.log4j.Logger"
+		factory-method="getLogger">
+		<constructor-arg value="eventAtleastOnceFileLogger" />
+	</bean>
+
+	<bean id="eventAtleastOnceConsoleLogger" class="org.apache.log4j.Logger"
+		factory-method="getLogger">
+		<constructor-arg value="eventAtleastOnceConsoleLogger" />
+	</bean>
+
+	<bean id="eventPeriodicFileLogger" class="org.apache.log4j.Logger"
+		factory-method="getLogger">
+		<constructor-arg value="eventPeriodicFileLogger" />
+	</bean>
+
+	<bean id="eventPeriodicConsoleLogger" class="org.apache.log4j.Logger"
+		factory-method="getLogger">
+		<constructor-arg value="eventPeriodicConsoleLogger" />
+	</bean>
+
+	<bean id="heartBeatFileLogger" class="org.apache.log4j.Logger"
+		factory-method="getLogger">
+		<constructor-arg value="heartBeatFileLogger" />
+	</bean>
+
+	<bean id="heartBeatConsoleLogger" class="org.apache.log4j.Logger"
+		factory-method="getLogger">
+		<constructor-arg value="heartBeatConsoleLogger" />
+	</bean>
+
+	<bean id="engineContext" class="com.micer.engine.context.EngineContextImpl">
+		<property name="engineConfig" value="engine.properties" />
+		<property name="statusCodeConfig" value="haiwan.properties" />
+	</bean>
+
+	<!-- <bean id="mockDeviceServerProtocol" class="com.micer.mock.codec.MockDeviceServerProtocol">
+		<property name="protocolId" value="mockDeviceServerProtocol" />
+	</bean> -->
+	
+	<bean id="haiwan001Protocol" class="com.micer.engine.codec.haiwan.Haiwan001Protocol">
+		<property name="protocolId" value="haiwan001Protocol" />
+	</bean>
+	
+	 <bean id="fuan001Protocol" class="com.micer.engine.codec.fuan.Fuan001Protocol">
+		<property name="protocolId" value="fuan001Protocol" />
+	</bean>
+	
+
+	<bean id="kafkaProducerGenerator" class="com.micer.core.kafka.KafkaProducerGenerator">
+		<property name="kafkaConfig" value="kafka.properties" />
+	</bean>
+
+	<bean id="deviceStatusCache"
+		class="com.micer.core.device.cache.DeviceStatusCacheInMemoryImpl" />
+
+	<bean id="atleastOnceEventCache" class="com.micer.core.event.cache.ExtendedEventBlockingDeque" />
+
+	<bean id="periodicEventCache" class="com.micer.core.event.cache.ExtendedEventBlockingDeque" />
+	
+	<bean id="responseEventCache" class="com.micer.core.event.cache.ResponseEventBlockingDeque" />
+
+	<bean id="onlineHeartBeatWorker" class="com.micer.engine.heartbeat.OnlineHeartBeatWorker"
+		scope="prototype">
+		<property name="networkLogger" ref="networkFileLogger" />
+		<property name="fileLogger" ref="heartBeatFileLogger" />
+		<property name="consoleLogger" ref="heartBeatConsoleLogger" />
+		<property name="producerGenerator" ref="kafkaProducerGenerator" />
+		<property name="deviceStatusCache" ref="deviceStatusCache" />
+	</bean>
+
+	<!-- <bean id="sMSHandler" class="com.micer.engine.event.handler.SMSHandler">
+		<constructor-arg index="0" value="SMSHandler-Handler" />
+	</bean> -->
+
+
+	<bean id="atleastOnceEventHandler" class="com.micer.engine.event.handler.AtleastOnceEventHandler">
+		<constructor-arg index="0" value="AtleastOnceEventHandler" />
+		<property name="networkLogger" ref="networkFileLogger" />
+		<property name="fileLogger" ref="eventAtleastOnceFileLogger" />
+		<property name="consoleLogger" ref="eventAtleastOnceConsoleLogger" />
+		<property name="producerGenerator" ref="kafkaProducerGenerator" />
+		<property name="atleastOnceEventCache" ref="atleastOnceEventCache" />
+		<property name="periodicEventCache" ref="periodicEventCache" />
+	</bean>
+
+	<bean id="atleastOnceEventHandlerChain" class="com.micer.core.handler.HandlerChain">
+		<property name="handlerList">
+			<list>
+				<!-- <ref bean="sMSHandler" /> -->
+				<ref bean="atleastOnceEventHandler" />
+			</list>
+		</property>
+	</bean>
+
+	<bean id="atleastOnceEventProcessorWorker"
+		class="com.micer.engine.processor.worker.DefaultEventProcessorWorker"
+		scope="prototype">
+		<property name="extendedEventCache" ref="atleastOnceEventCache" />
+		<property name="handlerChain" ref="atleastOnceEventHandlerChain" />
+	</bean>
+
+	<bean id="atleastOnceEventProcessor" class="com.micer.engine.processor.AtleastOnceEventProcessor">
+		<constructor-arg index="0" value="AtleastOnceEventProcessor" />
+		<property name="atleastOnceEventCache" ref="atleastOnceEventCache" />
+	</bean>
+	
+	
+	<bean id="responseEventProcessor" class="com.micer.engine.processor.ResponseEventProcessor">
+		<constructor-arg index="0" value="ResponseEventProcessor" />
+		<property name="responseEventCache" ref="responseEventCache" />
+		<property name="deviceStatusCache" ref="deviceStatusCache" />
+	</bean>
+	
+	<bean id="responseEventProcessorWorker"
+		class="com.micer.engine.processor.worker.ResponseEventProcessorWorker"
+		scope="prototype">
+		<property name="responseEventCache" ref="responseEventCache" />
+		<property name="handlerChain" ref="responseEventHandlerChain" />
+	</bean>
+	
+	<bean id="responseEventHandlerChain" class="com.micer.core.handler.HandlerChain">
+		<property name="handlerList">
+			<list>
+				<ref bean="responseEventHandler" />
+			</list>
+		</property>
+	</bean>
+	
+	<bean id="responseEventHandler" class="com.micer.engine.event.handler.ResponseEventHandler">
+		<constructor-arg index="0" value="ResponseEventHandler" />
+		<property name="networkLogger" ref="networkFileLogger" />
+	
+		<property name="responseEventCache" ref="responseEventCache" />
+		
+		<property name="deviceStatusCache" ref="deviceStatusCache" />
+		<property name="atleastOnceEventCache" ref="atleastOnceEventCache" />
+	</bean>
+	
+
+	 <bean id="periodicEventHandler" class="com.micer.engine.event.handler.PeriodicEventHandler">
+		<constructor-arg index="0" value="PeriodicEventHandler" />
+		<property name="networkLogger" ref="networkFileLogger" />
+		<property name="fileLogger" ref="eventPeriodicFileLogger" />
+		<property name="consoleLogger" ref="eventPeriodicConsoleLogger" />
+		<property name="producerGenerator" ref="kafkaProducerGenerator" />
+		<property name="periodicEventCache" ref="periodicEventCache" />
+		<property name="deviceStatusCache" ref="deviceStatusCache" />
+	</bean>
+
+	 <bean id="periodicEventHandlerChain" class="com.micer.core.handler.HandlerChain">
+		<property name="handlerList">
+			<list>
+				<ref bean="periodicEventHandler" />
+			</list>
+		</property>
+	</bean>
+
+	 <bean id="periodicEventProcessorWorker"
+		class="com.micer.engine.processor.worker.DefaultEventProcessorWorker"
+		scope="prototype">
+		<property name="extendedEventCache" ref="atleastOnceEventCache" />
+		<property name="handlerChain" ref="periodicEventHandlerChain" />
+	</bean>
+
+	 <bean id="periodicEventProcessor" class="com.micer.engine.processor.PeriodicEventProcessor">
+		<constructor-arg index="0" value="PeriodicEventProcessor" />
+		<property name="periodicEventCache" ref="periodicEventCache" />
+		<property name="deviceStatusCache" ref="deviceStatusCache" />
+	</bean>
+
+
+	<bean id="mission4ExecuteCache" class="com.micer.engine.mission.cache.Mission4ExecuteRingCache" />
+
+	<bean id="hubOrientedExecutorWorker"
+		class="com.micer.engine.executor.worker.HubOrientedExecutorWorker"
+		scope="prototype">
+		<property name="fileLogger" ref="eventFileLogger" />
+		<property name="consoleLogger" ref="eventConsoleLogger" />
+		<property name="mission4ExecuteCache" ref="mission4ExecuteCache" />
+		<property name="deviceStatusCache" ref="deviceStatusCache" />
+		<property name="atleastOnceEventCache" ref="atleastOnceEventCache" />
+		<property name="responseEventCache" ref="responseEventCache" />
+	</bean>
+
+	<bean id="hubOrientedMissionExecutor" class="com.micer.engine.executor.HubOrientedMissionExecutor">
+		<constructor-arg index="0" value="HubOrientedMissionExecutor" />
+		<property name="mission4ExecuteCache" ref="mission4ExecuteCache" />
+		<property name="executorWorker" ref="hubOrientedExecutorWorker" />
+	</bean>
+
+	<bean id="hubOrientedTCPConnEngine" class="com.micer.engine.HubOrientedTCPConnEngine">
+		<property name="deviceStatusCache" ref="deviceStatusCache" />
+		<property name="mission4ExecuteCache" ref="mission4ExecuteCache" />
+		<property name="missionExecutor" ref="hubOrientedMissionExecutor" />
+		<property name="atleastOnceEventCache" ref="atleastOnceEventCache" />
+		<property name="atleastOnceEventProcessor" ref="atleastOnceEventProcessor" />
+		<property name="periodicEventCache" ref="periodicEventCache" />
+		 <property name="periodicEventProcessor" ref="periodicEventProcessor" />
+		<property name="onlineHeartBeatWorker" ref="onlineHeartBeatWorker" />
+		<property name="responseEventCache" ref="responseEventCache" />		
+		<property name="responseEventProcessor" ref="responseEventProcessor" /> 
+		<property name="responseEventHandler" ref="responseEventHandler" />		
+	</bean>
+
+    
+	<!-- <bean id="hubOrientedMockEngine" class="com.micer.mock.engine.HubOrientedMockEngine">
+		<property name="deviceStatusCache" ref="deviceStatusCache" />
+		<property name="mission4ExecuteCache" ref="mission4ExecuteCache" />
+		<property name="missionExecutor" ref="hubOrientedMissionExecutor" />
+		<property name="atleastOnceEventCache" ref="atleastOnceEventCache" />
+		<property name="atleastOnceEventProcessor" ref="atleastOnceEventProcessor" />
+		<property name="periodicEventCache" ref="periodicEventCache" />
+		<property name="periodicEventProcessor" ref="periodicEventProcessor" />
+		<property name="onlineHeartBeatWorker" ref="onlineHeartBeatWorker" />
+		<property name="responseEventCache" ref="responseEventCache" />
+		<property name="responseEventProcessor" ref="responseEventProcessor" />
+	</bean> -->
+    
+
+</beans>

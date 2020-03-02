@@ -1,0 +1,246 @@
+<?xml version="1.0" encoding="UTF-8"?>  
+<!DOCTYPE log4j:configuration SYSTEM "log4j.dtd">
+<log4j:configuration xmlns:log4j="http://jakarta.apache.org/log4j/">
+
+
+	<!-- 控制台 -->
+	<appender name="console" class="org.apache.log4j.ConsoleAppender">
+		<param name="Target" value="System.err" />
+		<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern" value="%-5p: %-30.30c : %m%n" />
+		</layout>
+		<!--过滤器设置输出的级别-->
+        <filter class="org.apache.log4j.varia.LevelRangeFilter">
+            <!-- 设置日志输出的最小级别 -->
+            <param name="levelMin" value="WARN"/>
+            <!-- 设置日志输出的最大级别 -->
+            <param name="levelMax" value="ERROR"/>
+        </filter>
+	</appender>
+
+	<!-- 每天 系统日志 -->
+	<!-- <appender name="engineFileAppender" class="org.apache.log4j.DailyRollingFileAppender">
+		<param name="File" value="logs/engine.log" />
+		<param name="DatePattern" value="'.'yyyy-MM-dd" />
+		<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern" value="%-5p: %-30.30c : %m%n" />
+		</layout>
+	</appender> -->
+	<appender name="engineFileAppender" class="org.apache.log4j.RollingFileAppender">
+		<param name="File" value="logs/engine.log" />
+		<param name="Append" value="true"/>
+		<param name="MaxFileSize" value="5MB"/>
+		<param name="MaxBackupIndex" value="1"/>  
+		<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern" value="%m%n" />
+		</layout>
+	</appender>
+
+	<!-- 每个月 全部设备事件 -->
+	<!-- <appender name="eventFileAppender" class="org.apache.log4j.DailyRollingFileAppender">
+		<param name="File" value="logs/event.log" />
+		<param name="DatePattern" value="'.'yyyy-MM" />
+		<param name="MaxFileSize" value="20MB" />
+		<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern" value="%m%n" />
+		</layout>
+	</appender> -->
+
+	<!--全部设备事件  最多产生5个日志文件，每一个文件最大值10MB，最大总50MB -->
+	<appender name="eventFileAppender" class="org.apache.log4j.RollingFileAppender">
+		<param name="File" value="logs/event.log" />
+		<param name="Append" value="true"/>
+		<param name="MaxFileSize" value="10MB"/>
+		<param name="MaxBackupIndex" value="4"/>  
+		<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern" value="%m%n" />
+		</layout>
+	</appender>
+
+	<!-- 每个月 至少发送成功一次设备事件 -->
+	<!-- <appender name="eventAtleastOnceFileAppender" class="org.apache.log4j.DailyRollingFileAppender">
+		<param name="File" value="logs/event_atleast_once.log" />
+		<param name="DatePattern" value="'.'yyyy-MM" />
+		<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern" value="%m%n" />
+		</layout>
+	</appender> -->
+	<!--至少发送成功一次设备事件  最多产生5个日志文件，每一个文件最大值2MB，最大总10MB -->
+	<appender name="eventAtleastOnceFileAppender" class="org.apache.log4j.RollingFileAppender">
+		<param name="File" value="logs/event_atleast_once.log" />
+		<param name="Append" value="true"/>
+		<param name="MaxFileSize" value="2MB"/>
+		<param name="MaxBackupIndex" value="4"/>  
+		<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern" value="%m%n" />
+		</layout>
+	</appender>
+	
+
+	<!-- 每个月 周期发送设备事件 -->
+	<appender name="eventPeriodicFileAppender" class="org.apache.log4j.DailyRollingFileAppender">
+		<param name="File" value="logs/event_periodic.log" />
+		<param name="DatePattern" value="'.'yyyy-MM" />
+		<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern" value="%m%n" />
+		</layout>
+	</appender>
+
+	<!-- 心跳包 -->
+	<!-- <appender name="heartBeatFileAppender" class="org.apache.log4j.DailyRollingFileAppender">
+		<param name="File" value="logs/heart_beat.log" />
+		<param name="DatePattern" value="'.'yyyy-MM" />
+		<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern" value="%m%n" />
+		</layout>
+	</appender> -->
+	<!--心跳包  最多产生5个日志文件，每一个文件最大值1MB，最大总5MB -->
+	<appender name="heartBeatFileAppender" class="org.apache.log4j.RollingFileAppender">
+		<param name="File" value="logs/heart_beat.log" />
+		<param name="Append" value="true"/>
+		<param name="MaxFileSize" value="1MB"/>
+		<param name="MaxBackupIndex" value="4"/>  
+		<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern" value="%m%n" />
+		</layout>
+	</appender>
+
+	<!--每天 网络性能 -->
+<!-- 	<appender name="networkFileAppender" class="org.apache.log4j.DailyRollingFileAppender">
+		<param name="File" value="logs/network.log" />
+		<param name="DatePattern" value="'.'yyyy-MM-dd" />
+		<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern" value="%m%n" />
+		</layout>
+	</appender> -->
+	 <!--网络性能   最多产生5个日志文件，每一个文件最大值1MB，最大总5MB -->
+	<appender name="networkFileAppender" class="org.apache.log4j.RollingFileAppender">
+		<param name="File" value="logs/network.log" />
+		<param name="Append" value="true"/>
+		<param name="MaxFileSize" value="1MB"/>
+		<param name="MaxBackupIndex" value="4"/>  
+		<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern" value="%m%n" />
+		</layout>
+	</appender>
+	
+	
+	<!-- 每天 tcp连接 -->
+	<appender name="tcpConnFileAppender" class="org.apache.log4j.DailyRollingFileAppender">
+		<param name="File" value="logs/tcpConn.log" />
+		<param name="DatePattern" value="'.'yyyy-MM-dd" />
+		<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern" value="%m%n" />
+		</layout>
+	</appender>
+	
+	<!--每天 流读取 -->
+	<appender name="flowReadFileAppender" class="org.apache.log4j.DailyRollingFileAppender">
+		<param name="File" value="logs/flowRead.log" />
+		<param name="DatePattern" value="'.'yyyy-MM-dd" />
+		<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern" value="%m%n" />
+		</layout>
+	</appender>
+	
+	<!--每天 流写入 -->
+	<appender name="flowWriteFileAppender" class="org.apache.log4j.DailyRollingFileAppender">
+		<param name="File" value="logs/flowWrite.log" />
+		<param name="DatePattern" value="'.'yyyy-MM-dd" />
+		<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern" value="%m%n" />
+		</layout>
+	</appender>
+	
+	<!-- 每天read接收数据-->
+	 <appender name="receiveDataAppender" class="org.apache.log4j.DailyRollingFileAppender">
+		<param name="File" value="logs/receiveData.log" />
+		<param name="DatePattern" value="'.'yyyy-MM-dd" />
+		<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern" value="%m%n" />
+		</layout>
+	</appender>
+	
+	
+
+	
+	<logger name="receiveDataLogger" additivity="false">
+		<level value="info" />
+		<appender-ref ref="receiveDataAppender" />
+	</logger>
+
+	<logger name="flowWriteFileLogger" additivity="false">
+		<level value="info" />
+		<appender-ref ref="flowWriteFileAppender" />
+	</logger>
+	
+	<logger name="flowReadFileLogger" additivity="false">
+		<level value="info" />
+		<appender-ref ref="flowReadFileAppender" />
+	</logger>
+	
+	<logger name="tcpConnFileLogger" additivity="false">
+		<level value="info" />
+		<appender-ref ref="tcpConnFileAppender" />
+	</logger> 
+	
+	
+
+	<logger name="eventFileLogger" additivity="false">
+		<level value="info" />
+		<appender-ref ref="eventFileAppender" />
+	</logger>
+
+	<logger name="eventConsoleLogger" additivity="false">
+		<level value="debug" />
+		<appender-ref ref="engineFileAppender" />
+	</logger>
+
+	<logger name="eventAtleastOnceFileLogger" additivity="false">
+		<level value="info" />
+		<appender-ref ref="eventAtleastOnceFileAppender" />
+	</logger>
+
+	<logger name="eventAtleastOnceConsoleLogger" additivity="false">
+		<level value="debug" />
+		<appender-ref ref="engineFileAppender" />
+	</logger>
+
+	<logger name="eventPeriodicFileLogger" additivity="false">
+		<level value="info" />
+		<appender-ref ref="eventPeriodicFileAppender" />
+	</logger>
+
+	<!-- <logger name="eventPeriodicConsoleLogger" additivity="false">
+		<level value="debug" />
+		<appender-ref ref="console" />
+	</logger> -->
+
+	<logger name="heartBeatFileLogger" additivity="false">
+		<level value="debug" />
+		<appender-ref ref="heartBeatFileAppender" />
+	</logger>
+
+	<!-- <logger name="heartBeatConsoleLogger" additivity="false">
+		<level value="debug" />
+		<appender-ref ref="console" />
+	</logger>
+
+	<logger name="mockDeviceServerConsoleLogger" additivity="false">
+		<level value="debug" />
+		<appender-ref ref="console" />
+	</logger> -->
+
+	<logger name="networkFileLogger" additivity="false">
+		<level value="debug" />
+		<appender-ref ref="networkFileAppender" />
+	</logger>
+
+	<root>
+		<priority value="error" />
+		<appender-ref ref="console" />
+		<appender-ref ref="engineFileAppender" />
+	</root>
+
+
+</log4j:configuration>
